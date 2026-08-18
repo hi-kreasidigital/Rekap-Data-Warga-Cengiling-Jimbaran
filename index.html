@@ -33,6 +33,20 @@
     <style>
         body { background-color: #f4f5fa; }
         .card-shadow { box-shadow: 0 4px 18px 0 rgba(109, 110, 111, 0.08); }
+        
+        /* Custom Styling Hover & Focus Dropdown Warna Hijau Emerald */
+        .dropdown-emerald {
+            transition: all 0.2s ease-in-out;
+        }
+        .dropdown-emerald:hover {
+            border-color: #059669 !important; /* emerald-600 */
+            box-shadow: 0 0 0 1px #059669 !important;
+        }
+        .dropdown-emerald:focus {
+            border-color: #059669 !important;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+            outline: none !important;
+        }
     </style>
 </head>
 <body class="font-sans text-slate-700 antialiased min-h-screen pb-12">
@@ -50,25 +64,24 @@
                     </div>
                     <p class="text-sm text-slate-500 mt-1 font-medium">Sistem Pemantauan Demografi dan Statistik Kependudukan</p>
                     <div class="flex items-center gap-2 mt-1">
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span id="connectionBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                             Terhubung langsung dengan Live Data Google Sheets
                         </span>
                     </div>
                 </div>
 
-                <!-- Dropdown Pilih Bulan -->
+                <!-- Dropdown Pilih Bulan (Warna Hover Hijau Emerald) -->
                 <div class="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                    <i data-lucide="calendar" class="w-5 h-5 text-brand-600"></i>
-                    <label for="monthSelect" class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Periode:</label>
-                    <select id="monthSelect" class="bg-white border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-brand-500 focus:border-brand-500 block p-2 font-semibold outline-none cursor-pointer">
+                    <i data-lucide="calendar" class="w-5 h-5 text-emerald-600"></i>
+                    <label for="monthSelect" class="text-xs font-semibold text-slate-600 uppercase tracking-wider">PERIODE:</label>
+                    <select id="monthSelect" class="dropdown-emerald bg-white border border-slate-300 text-slate-800 text-sm rounded-lg block p-2 font-semibold cursor-pointer">
                         <option value="JULY">JULI</option>
                         <option value="AUGUST">AGUSTUS</option>
                         <option value="SEPTEMBER">SEPTEMBER</option>
                         <option value="OCTOBER">OKTOBER</option>
                         <option value="NOVEMBER">NOVEMBER</option>
                         <option value="DECEMBER">DESEMBER</option>
-                        <option value="DATA HIDUP">TOTAL DATA HIDUP</option>
                     </select>
                 </div>
             </div>
@@ -92,9 +105,7 @@
                 <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                     <i data-lucide="users" class="w-5 h-5 text-brand-600"></i> Ringkasan Kategori Kependudukan
                 </h2>
-                <div id="scorecardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    <!-- Cards will be populated dynamically -->
-                </div>
+                <div id="scorecardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
             </div>
 
             <!-- Section 2: Bar Chart Umur / Kelompok Usia -->
@@ -118,39 +129,22 @@
                     <i data-lucide="pie-chart" class="w-5 h-5 text-brand-600"></i> Perbandingan Demografi & Mutasi Warga
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                    
-                    <!-- Pie 1: WNI vs WNA -->
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 card-shadow flex flex-col justify-between">
                         <h4 class="text-sm font-bold text-slate-700 text-center mb-2">Kewarganegaraan (WNI / WNA)</h4>
-                        <div class="h-48 relative">
-                            <canvas id="pieWniWna"></canvas>
-                        </div>
+                        <div class="h-48 relative"><canvas id="pieWniWna"></canvas></div>
                     </div>
-
-                    <!-- Pie 2: Pindah Datang vs Keluar -->
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 card-shadow flex flex-col justify-between">
                         <h4 class="text-sm font-bold text-slate-700 text-center mb-2">Mutasi Warga (Datang / Keluar)</h4>
-                        <div class="h-48 relative">
-                            <canvas id="pieMutasi"></canvas>
-                        </div>
+                        <div class="h-48 relative"><canvas id="pieMutasi"></canvas></div>
                     </div>
-
-                    <!-- Pie 3: Laki-laki vs Perempuan -->
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 card-shadow flex flex-col justify-between">
                         <h4 class="text-sm font-bold text-slate-700 text-center mb-2">Jenis Kelamin Total</h4>
-                        <div class="h-48 relative">
-                            <canvas id="pieGender"></canvas>
-                        </div>
+                        <div class="h-48 relative"><canvas id="pieGender"></canvas></div>
                     </div>
-
-                    <!-- Pie 4: Kelahiran vs Kematian -->
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 card-shadow flex flex-col justify-between">
                         <h4 class="text-sm font-bold text-slate-700 text-center mb-2">Vitalitas (Kelahiran / Kematian)</h4>
-                        <div class="h-48 relative">
-                            <canvas id="pieVitalitas"></canvas>
-                        </div>
+                        <div class="h-48 relative"><canvas id="pieVitalitas"></canvas></div>
                     </div>
-
                 </div>
             </div>
 
@@ -158,12 +152,11 @@
     </main>
 
     <script>
-        // MASUKKAN URL GOOGLE APPS SCRIPT WEB APP ANDA DI SINI
+        // MASUKKAN WEB APP URL DARI GOOGLE APPS SCRIPT DI SINI
         const API_URL = https://script.google.com/macros/s/AKfycbxGNRxxxSBAxKxXZfbKklTyoxk6SNKJZvMPb7t9DKK80zHKnXTQN7STWSHYC57fkHw/exec;
 
-        // Fallback Mock Data jika URL belum diisi untuk testing tampilan
         const mockRawData = [
-            ["KATEGORI REKAP DATA WARGA", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER", "DATA HIDUP"],
+            ["KATEGORI REKAP DATA WARGA", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER", "DATA HIDUP"],
             ["1. JUMLAH PENDUDUK AWAL WNI", 1490, 5, 5, 5, 3, 3, 1511],
             ["2. JUMLAH KK", 418, 2, 3, 3, 2, 1, 429],
             ["3. JUMLAH LAKI-LAKI", 961, 3, 5, 5, 3, 0, 977],
@@ -208,17 +201,17 @@
             ["17. JUMLAH LANSIA UMUR 75+", 146, 0, 0, 0, 0, 0, 146],
             ["LAKI-LAKI", 75, 0, 0, 0, 0, 0, 75],
             ["PEREMPUAN", 71, 0, 0, 0, 0, 0, 71],
-            ["18. JUMLAH DISABILITAS", null, 2, 3, 2, 2, 1, 10],
-            ["LAKI-LAKI", null, 3, 3, 2, 2, 1, 11],
-            ["PEREMPUAN", null, 1, 0, 0, 0, 0, 1],
-            ["19. JUMLAH PENERIMA BANSOS", null, 4, 5, 5, 3, 3, 20]
+            ["18. JUMLAH DISABILITAS", 0, 2, 3, 2, 2, 1, 10],
+            ["LAKI-LAKI", 0, 3, 3, 2, 2, 1, 11],
+            ["PEREMPUAN", 0, 1, 0, 0, 0, 0, 1],
+            ["19. JUMLAH PENERIMA BANSOS", 0, 4, 5, 5, 3, 3, 20]
         ];
 
         let globalSheetData = [];
         let chartInstances = {};
 
         document.addEventListener("DOMContentLoaded", () => {
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
             fetchData();
 
             document.getElementById("monthSelect").addEventListener("change", (e) => {
@@ -228,46 +221,41 @@
 
         async function fetchData() {
             try {
-                if (API_URL === https://script.google.com/macros/s/AKfycbxGNRxxxSBAxKxXZfbKklTyoxk6SNKJZvMPb7t9DKK80zHKnXTQN7STWSHYC57fkHw/exec) {
-                    console.warn("Menggunakan Mock Data karena API_URL belum dikonfigurasi.");
+                if (!API_URL || API_URL.includes(https://script.google.com/macros/s/AKfycbxGNRxxxSBAxKxXZfbKklTyoxk6SNKJZvMPb7t9DKK80zHKnXTQN7STWSHYC57fkHw/exec)) {
+                    console.warn("API_URL belum diatur. Menampilkan data fallback.");
                     globalSheetData = mockRawData;
                 } else {
                     const response = await fetch(API_URL);
+                    if (!response.ok) throw new Error("Network response was not ok");
                     const json = await response.json();
-                    if(json.status === "success") {
+                    if (json.status === "success" && Array.isArray(json.data)) {
                         globalSheetData = json.data;
                     } else {
-                        throw new Error(json.message);
+                        throw new Error(json.message || "Format data tidak valid");
                     }
                 }
             } catch (err) {
-                console.error("Gagal mengambil data, memuat mock data...", err);
+                console.error("Gagal mengambil data live, memuat mock data:", err);
                 globalSheetData = mockRawData;
+                const badge = document.getElementById("connectionBadge");
+                if (badge) {
+                    badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200";
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span> Mode Demo / Fallback Data`;
+                }
             } finally {
                 document.getElementById("loading").classList.add("hidden");
                 document.getElementById("dashboardContent").classList.remove("hidden");
-                renderDashboard("JULY");
+                
+                // MENGGUNAKAN DATA HIDUP SEBAGAI TAMPILAN DEFAULT SAAT DIBUKA
+                renderDashboard("DATA HIDUP");
             }
         }
 
-        function getValueByRowHeaderAndMonth(monthName, rowNameExact) {
-            const headerRow = globalSheetData[0];
-            const colIndex = headerRow.findIndex(c => c && c.toString().trim().toUpperCase() === monthName.toUpperCase());
-            if (colIndex === -1) return 0;
+        function getSubDetailValues(columnKey, mainHeaderPrefix) {
+            if (!globalSheetData || globalSheetData.length === 0) return { total: 0, kk: null, laki: null, perempuan: null };
 
-            for (let i = 1; i < globalSheetData.length; i++) {
-                const rowHeader = globalSheetData[i][0] ? globalSheetData[i][0].toString().trim() : "";
-                if (rowHeader.toUpperCase() === rowNameExact.toUpperCase()) {
-                    return Number(globalSheetData[i][colIndex]) || 0;
-                }
-            }
-            return 0;
-        }
-
-        // Fungsi khusus membaca sub-item (Laki-laki / Perempuan / KK) di bawah header utama
-        function getSubDetailValues(monthName, mainHeaderPrefix) {
             const headerRow = globalSheetData[0];
-            const colIndex = headerRow.findIndex(c => c && c.toString().trim().toUpperCase() === monthName.toUpperCase());
+            const colIndex = headerRow.findIndex(c => c && c.toString().trim().toUpperCase() === columnKey.toUpperCase());
             if (colIndex === -1) return { total: 0, kk: null, laki: null, perempuan: null };
 
             let startIndex = -1;
@@ -284,10 +272,9 @@
             const total = Number(globalSheetData[startIndex][colIndex]) || 0;
             let kk = null, laki = null, perempuan = null;
 
-            // Scan baris di bawahnya sampai bertemu nomor berikutnya
             for (let i = startIndex + 1; i < globalSheetData.length; i++) {
                 const label = globalSheetData[i][0] ? globalSheetData[i][0].toString().trim().toUpperCase() : "";
-                if (/^\d+\./.test(label)) break; // Berhenti jika ketemu angka utama lain (misal "6. ")
+                if (/^\d+\./.test(label)) break;
 
                 const val = Number(globalSheetData[i][colIndex]) || 0;
                 if (label.includes("KK")) kk = val;
@@ -298,13 +285,13 @@
             return { total, kk, laki, perempuan };
         }
 
-        function renderDashboard(selectedMonth) {
-            renderScorecards(selectedMonth);
-            renderAgeBarChart(selectedMonth);
-            renderPieCharts(selectedMonth);
+        function renderDashboard(selectedColumn) {
+            renderScorecards(selectedColumn);
+            renderAgeBarChart(selectedColumn);
+            renderPieCharts(selectedColumn);
         }
 
-        function renderScorecards(month) {
+        function renderScorecards(columnKey) {
             const container = document.getElementById("scorecardsGrid");
             container.innerHTML = "";
 
@@ -331,9 +318,7 @@
             ];
 
             categories.forEach(cat => {
-                const data = getSubDetailValues(month, cat.prefix);
-
-                // Buat teks kecil merah di kanan bawah
+                const data = getSubDetailValues(columnKey, cat.prefix);
                 let detailParts = [];
                 if (data.kk !== null) detailParts.push(`KK: ${data.kk}`);
                 if (data.laki !== null) detailParts.push(`Laki: ${data.laki}`);
@@ -362,22 +347,24 @@
                 container.insertAdjacentHTML("beforeend", cardHTML);
             });
 
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
 
-        function renderAgeBarChart(month) {
-            const ctx = document.getElementById('ageBarChart').getContext('2d');
+        function renderAgeBarChart(columnKey) {
+            const canvas = document.getElementById('ageBarChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
             
             const labels = ['0-1 Thn', '1-3 Thn', '4-5 Thn', 'Pemilih (17+)', 'Lansia (60+)', 'Lansia (75+)', 'Disabilitas', 'Bansos'];
             const values = [
-                getSubDetailValues(month, "12. JUMLAH BALITA UMUR 0-1 TAHUN").total,
-                getSubDetailValues(month, "13. JUMLAH BALITA UMUR 1-3 TAHUN").total,
-                getSubDetailValues(month, "14. JUMLAH BALITA UMUR 4-5 TAHUN").total,
-                getSubDetailValues(month, "15. JUMLAH PEMILIH UMUR 17+").total,
-                getSubDetailValues(month, "16. JUMLAH LANSIA UMUR 60+").total,
-                getSubDetailValues(month, "17. JUMLAH LANSIA UMUR 75+").total,
-                getSubDetailValues(month, "18. JUMLAH DISABILITAS").total,
-                getSubDetailValues(month, "19. JUMLAH PENERIMA BANSOS").total
+                getSubDetailValues(columnKey, "12. JUMLAH BALITA UMUR 0-1 TAHUN").total,
+                getSubDetailValues(columnKey, "13. JUMLAH BALITA UMUR 1-3 TAHUN").total,
+                getSubDetailValues(columnKey, "14. JUMLAH BALITA UMUR 4-5 TAHUN").total,
+                getSubDetailValues(columnKey, "15. JUMLAH PEMILIH UMUR 17+").total,
+                getSubDetailValues(columnKey, "16. JUMLAH LANSIA UMUR 60+").total,
+                getSubDetailValues(columnKey, "17. JUMLAH LANSIA UMUR 75+").total,
+                getSubDetailValues(columnKey, "18. JUMLAH DISABILITAS").total,
+                getSubDetailValues(columnKey, "19. JUMLAH PENERIMA BANSOS").total
             ];
 
             if (chartInstances.bar) chartInstances.bar.destroy();
@@ -397,9 +384,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
                         y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
                         x: { grid: { display: false } }
@@ -408,9 +393,11 @@
             });
         }
 
-        function renderPieCharts(month) {
+        function renderPieCharts(columnKey) {
             const createPie = (canvasId, key, labels, colors, dataValues) => {
-                const ctx = document.getElementById(canvasId).getContext('2d');
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
                 if (chartInstances[key]) chartInstances[key].destroy();
 
                 chartInstances[key] = new Chart(ctx, {
@@ -435,24 +422,20 @@
                 });
             };
 
-            // 1. WNI vs WNA
-            const wni = getSubDetailValues(month, "1. JUMLAH PENDUDUK AWAL WNI").total;
-            const wna = getSubDetailValues(month, "10. JUMLAH WARGA NEGARA ASING (WNA)").total;
+            const wni = getSubDetailValues(columnKey, "1. JUMLAH PENDUDUK AWAL WNI").total;
+            const wna = getSubDetailValues(columnKey, "10. JUMLAH WARGA NEGARA ASING (WNA)").total;
             createPie('pieWniWna', 'wniWna', ['WNI', 'WNA'], ['#8b5cf6', '#f59e0b'], [wni, wna]);
 
-            // 2. Pindah Datang vs Keluar
-            const datang = getSubDetailValues(month, "5. JUMLAH PINDAH DATANG").total;
-            const keluar = getSubDetailValues(month, "6. PINDAH KELUAR").total;
+            const datang = getSubDetailValues(columnKey, "5. JUMLAH PINDAH DATANG").total;
+            const keluar = getSubDetailValues(columnKey, "6. PINDAH KELUAR").total;
             createPie('pieMutasi', 'mutasi', ['Datang', 'Keluar'], ['#10b981', '#ef4444'], [datang, keluar]);
 
-            // 3. Laki-laki vs Perempuan
-            const laki = getSubDetailValues(month, "3. JUMLAH LAKI-LAKI").total;
-            const perempuan = getSubDetailValues(month, "4. JUMLAH PEREMPUAN").total;
+            const laki = getSubDetailValues(columnKey, "3. JUMLAH LAKI-LAKI").total;
+            const perempuan = getSubDetailValues(columnKey, "4. JUMLAH PEREMPUAN").total;
             createPie('pieGender', 'gender', ['Laki-Laki', 'Perempuan'], ['#3b82f6', '#ec4899'], [laki, perempuan]);
 
-            // 4. Kelahiran vs Kematian
-            const lahir = getSubDetailValues(month, "7. JUMLAH KELAHIRAN").total;
-            const mati = getSubDetailValues(month, "8. JUMLAH KEMATIAN").total;
+            const lahir = getSubDetailValues(columnKey, "7. JUMLAH KELAHIRAN").total;
+            const mati = getSubDetailValues(columnKey, "8. JUMLAH KEMATIAN").total;
             createPie('pieVitalitas', 'vitalitas', ['Kelahiran', 'Kematian'], ['#06b6d4', '#64748b'], [lahir, mati]);
         }
     </script>
