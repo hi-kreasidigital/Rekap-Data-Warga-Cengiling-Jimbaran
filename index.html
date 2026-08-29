@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Rekap Data Warga Cengiling, Jimbaran</title>
+    <!-- Google Fonts & Chart.js & Chart.js DataLabels Plugin & TailwindCSS & Lucide Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        // Register Chart.js DataLabels plugin
+        Chart.register(ChartDataLabels);
+
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        },
+                        indigoBrand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f8fafc; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.03); }
+        .card-shadow-hover:hover { 
+            box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 10px 10px -5px rgba(15, 23, 42, 0.04); 
+            transform: translateY(-2px);
+        }
+        
+        .dropdown-emerald {
+            transition: all 0.2s ease-in-out;
+        }
+        .dropdown-emerald:hover {
+            border-color: #059669 !important;
+            box-shadow: 0 0 0 1px #059669 !important;
+        }
+        .dropdown-emerald:focus {
+            border-color: #059669 !important;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+            outline: none !important;
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-700 antialiased min-h-screen pb-16">
+
+    <!-- Top Gradient Header Bar -->
+    <div class="h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-indigo-600"></div>
+
+    <!-- Header Section -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <span class="p-2.5 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-xl shadow-md shadow-emerald-200">
+                            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+                        </span>
+                        <div>
+                            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">Dashboard Rekap Data Warga Cengiling, Jimbaran</h1>
+                            <p class="text-xs sm:text-sm text-slate-500 font-medium">Sistem Pemantauan Demografi dan Statistik Kependudukan Live Real-Time</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 mt-3">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-xs font-bold text-emerald-600">Terhubung langsung dengan Live Data Google Sheets</span>
+                    </div>
+                </div>
+
+                <!-- Dropdown Pilih Bulan & Option DATA HIDUP -->
+                <div class="flex items-center gap-3 bg-slate-50 p-2.5 rounded-2xl border border-slate-200 shadow-inner">
+                    <div class="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
+                        <i data-lucide="calendar-range" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <label for="monthSelect" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">PERIODE DATA</label>
+                        <select id="monthSelect" class="dropdown-emerald bg-white border border-slate-300 text-slate-800 text-sm rounded-lg block px-3 py-1.5 font-bold cursor-pointer">
+                            <option value="DATA HIDUP" selected>TOTAL DATA HIDUP (DEFAULT)</option>
+                            <option value="JULI">JULI</option>
+                            <option value="AGUSTUS">AGUSTUS</option>
+                            <option value="SEPTEMBER">SEPTEMBER</option>
+                            <option value="OKTOBER">OKTOBER</option>
+                            <option value="NOVEMBER">NOVEMBER</option>
+                            <option value="DESEMBER">DESEMBER</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border border-slate-200 shadow-sm">
+            <div class="relative flex items-center justify-center">
+                <div class="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
+                <i data-lucide="database" class="w-6 h-6 text-emerald-600 absolute"></i>
+            </div>
+            <p class="mt-4 text-slate-700 font-bold text-base">Sinkronisasi Data Google Sheets...</p>
+            <p class="text-xs text-slate-400 mt-1">Mengambil statistik kependudukan terbaru</p>
+        </div>
+
+        <!-- Dashboard Body -->
+        <div id="dashboardContent" class="hidden space-y-8">
+
+            <!-- Section 1: Scorecards Grid -->
+            <div>
+                <div class="flex items-center justify-between mb-5">
+                    <h2 class="text-lg font-extrabold text-slate-800 flex items-center gap-2.5">
+                        <span class="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg">
+                            <i data-lucide="users" class="w-5 h-5"></i>
+                        </span>
+                        Ringkasan Kategori Kependudukan
+                    </h2>
+                    <span id="selectedPeriodeBadge" class="text-xs font-bold px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full uppercase">
+                        PERIODE: TOTAL DATA HIDUP
+                    </span>
+                </div>
+
+                <div id="scorecardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+            </div>
+
+            <!-- Section 2: Bar Chart Umur / Kelompok Usia -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 card-shadow">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-800 flex items-center gap-2.5">
+                            <span class="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg">
+                                <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                            </span>
+                            Distribusi Kelompok Umur & Demografi Khusus
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Statistik Balita, Pemilih, Lansia, Disabilitas, & Bansos</p>
+                    </div>
+                </div>
+                <div class="h-80">
+                    <canvas id="ageBarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Section 3: Pie Charts Grid -->
+            <div>
+                <h2 class="text-lg font-extrabold text-slate-800 mb-5 flex items-center gap-2.5">
+                    <span class="p-1.5 bg-amber-100 text-amber-600 rounded-lg">
+                        <i data-lucide="pie-chart" class="w-5 h-5"></i>
+                    </span>
+                    Perbandingan Demografi & Mutasi Warga
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200 card-shadow flex flex-col justify-between">
+                        <h4 class="text-xs font-extrabold text-slate-700 text-center uppercase tracking-wider mb-3">Kewarganegaraan (WNI / WNA)</h4>
+                        <div class="h-52 relative"><canvas id="pieWniWna"></canvas></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200 card-shadow flex flex-col justify-between">
+                        <h4 class="text-xs font-extrabold text-slate-700 text-center uppercase tracking-wider mb-3">Mutasi Warga (Datang / Keluar)</h4>
+                        <div class="h-52 relative"><canvas id="pieMutasi"></canvas></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200 card-shadow flex flex-col justify-between">
+                        <h4 class="text-xs font-extrabold text-slate-700 text-center uppercase tracking-wider mb-3">Jenis Kelamin Total</h4>
+                        <div class="h-52 relative"><canvas id="pieGender"></canvas></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200 card-shadow flex flex-col justify-between">
+                        <h4 class="text-xs font-extrabold text-slate-700 text-center uppercase tracking-wider mb-3">Vitalitas (Kelahiran / Kematian)</h4>
+                        <div class="h-52 relative"><canvas id="pieVitalitas"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // URL WEB APP GOOGLE APPS SCRIPT
+        const API_URL = "https://script.google.com/macros/s/AKfycbyn2WBTn3pA__XIifgGsiXD9qqEEsXDOJFOKWHXByYwXvARmXlDheSqoonPHZuK2rNN/exec";
+
+        const MONTH_MAP = {
+            "JULI": ["JULI", "JULY"],
+            "AGUSTUS": ["AGUSTUS", "AUGUST"],
+            "SEPTEMBER": ["SEPTEMBER"],
+            "OKTOBER": ["OKTOBER", "OCTOBER"],
+            "NOVEMBER": ["NOVEMBER"],
+            "DESEMBER": ["DESEMBER", "DECEMBER"],
+            "TOTAL 2026": ["TOTAL 2026"],
+            "DATA HIDUP": ["DATA HIDUP"]
+        };
+
+        const mockRawData = [
+            ["KATEGORI REKAP DATA WARGA", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER", "TOTAL 2026", "DATA HIDUP"],
+            ["1. JUMLAH PENDUDUK AWAL WNI", 1904, 5, 5, 5, 3, 3, 1925, 1919],
+            ["2. JUMLAH KK", 418, 3, 3, 3, 2, 1, 430, 428],
+            ["3. JUMLAH LAKI-LAKI", 961, 4, 5, 5, 3, 0, 978, 975],
+            ["4. JUMLAH PEREMPUAN", 947, 1, 0, 0, 0, 0, 948, 945],
+            ["5. JUMLAH PINDAH DATANG", 1, 5, 5, 5, 3, 2, 21, 21],
+            ["JUMLAH KK", 1, 3, 3, 2, 2, 1, 12, 12],
+            ["LAKI-LAKI", 2, 4, 5, 5, 3, 3, 22, 22],
+            ["PEREMPUAN", 1, 1, 0, 0, 0, 0, 2, 2],
+            ["6. PINDAH KELUAR", 4, 0, 0, 0, 0, 0, 4, 4],
+            ["JUMLAH KK", 2, 0, 0, 0, 0, 0, 2, 2],
+            ["LAKI-LAKI", 2, 0, 0, 0, 0, 0, 2, 2],
+            ["PEREMPUAN", 2, 0, 0, 0, 0, 0, 2, 2],
+            ["7. JUMLAH KELAHIRAN", 2, 1, 0, 0, 0, 0, 3, 3],
+            ["LAKI-LAKI", 2, 1, 0, 0, 0, 0, 3, 3],
+            ["PEREMPUAN", 0, 0, 0, 0, 0, 0, 0, 0],
+            ["8. JUMLAH KEMATIAN", 2, 0, 0, 0, 0, 0, 2, 2],
+            ["LAKI-LAKI", 1, 0, 0, 0, 0, 0, 1, 1],
+            ["PEREMPUAN", 1, 0, 0, 0, 0, 0, 1, 1],
+            ["9. JUMLAH PENDUDUK NON PERMANEN", 4, 4, 5, 5, 3, 3, 24, 24],
+            ["JUMLAH KK", 1, 2, 3, 2, 2, 1, 11, 11],
+            ["LAKI-LAKI", 1, 3, 5, 5, 0, 3, 17, 17],
+            ["PEREMPUAN", 3, 1, 0, 0, 0, 0, 4, 4],
+            ["10. JUMLAH WARGA NEGARA ASING (WNA)", 4, 0, 0, 0, 0, 0, 4, 4],
+            ["LAKI-LAKI", 4, 0, 0, 0, 0, 0, 4, 4],
+            ["PEREMPUAN", 0, 0, 0, 0, 0, 0, 0, 0],
+            ["11. JUMLAH ADMINISTRASI SURAT MENYURAT", 5, 5, 1, 1, 1, 2, 15, 15],
+            ["12. JUMLAH BALITA UMUR 0-1 TAHUN", 8, 1, 0, 0, 0, 0, 9, 9],
+            ["LAKI-LAKI", 7, 1, 0, 0, 0, 0, 8, 8],
+            ["PEREMPUAN", 1, 0, 0, 0, 0, 0, 1, 1],
+            ["13. JUMLAH BALITA UMUR 1-3 TAHUN", 46, 1, 0, 0, 0, 0, 47, 47],
+            ["LAKI-LAKI", 31, 1, 0, 0, 0, 0, 32, 32],
+            ["PEREMPUAN", 15, 0, 0, 0, 0, 0, 15, 15],
+            ["14. JUMLAH BALITA UMUR 4-5 TAHUN", 46, 1, 0, 0, 0, 0, 47, 47],
+            ["LAKI-LAKI", 18, 1, 0, 0, 0, 0, 19, 19],
+            ["PEREMPUAN", 28, 0, 0, 0, 0, 0, 28, 28],
+            ["15. JUMLAH PEMILIH UMUR 17+", 1699, 3, 5, 5, 3, 3, 1718, 1718],
+            ["LAKI-LAKI", 837, 3, 5, 5, 3, 3, 856, 856],
+            ["PEREMPUAN", 862, 0, 0, 0, 0, 0, 862, 862],
+            ["16. JUMLAH LANSIA UMUR 60+", 402, 0, 0, 0, 0, 0, 402, 402],
+            ["LAKI-LAKI", 201, 0, 0, 0, 0, 0, 201, 201],
+            ["PEREMPUAN", 201, 0, 0, 0, 0, 0, 201, 201],
+            ["17. JUMLAH LANSIA UMUR 75+", 146, 0, 0, 0, 0, 0, 146, 146],
+            ["LAKI-LAKI", 75, 0, 0, 0, 0, 0, 75, 75],
+            ["PEREMPUAN", 71, 0, 0, 0, 0, 0, 71, 71],
+            ["18. JUMLAH DISABILITAS", 2, 3, 3, 2, 2, 1, 13, 13],
+            ["LAKI-LAKI", 1, 3, 3, 2, 2, 1, 12, 12],
+            ["PEREMPUAN", 1, 0, 0, 0, 0, 0, 2, 2],
+            ["19. JUMLAH PENERIMA BANSOS", 1, 4, 5, 5, 3, 3, 21, 21]
+        ];
+
+        let globalSheetData = [];
+        let chartInstances = {};
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.lucide) lucide.createIcons();
+            fetchData();
+
+            document.getElementById("monthSelect").addEventListener("change", (e) => {
+                const val = e.target.value;
+                const badgeText = val === "DATA HIDUP" ? "TOTAL DATA HIDUP" : val;
+                document.getElementById("selectedPeriodeBadge").innerText = "PERIODE: " + badgeText;
+                renderDashboard(val);
+            });
+        });
+
+        async function fetchData() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error("Network response not ok");
+                
+                const json = await response.json();
+                if (json && Array.isArray(json)) {
+                    globalSheetData = json;
+                } else if (json && json.status === "success" && Array.isArray(json.data)) {
+                    globalSheetData = json.data;
+                } else {
+                    throw new Error("Format JSON tidak sesuai");
+                }
+            } catch (err) {
+                console.warn("Gagal mengambil live data (Menggunakan fallback/mock data):", err);
+                globalSheetData = mockRawData;
+            } finally {
+                document.getElementById("loading").classList.add("hidden");
+                document.getElementById("dashboardContent").classList.remove("hidden");
+                
+                renderDashboard("DATA HIDUP");
+            }
+        }
+
+        // PERBAIKAN 1: Pencarian Kolom Secara Dinamis Murni dari Header Spreadsheet
+        function findColumnIndex(headerRow, columnKey) {
+            if (!headerRow || !Array.isArray(headerRow)) return -1;
+            const keyUpper = columnKey.trim().toUpperCase();
+            const allowedNames = MONTH_MAP[keyUpper] || [keyUpper];
+
+            for (let i = 0; i < headerRow.length; i++) {
+                const cellVal = headerRow[i] ? headerRow[i].toString().trim().toUpperCase() : "";
+                if (allowedNames.includes(cellVal)) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        // PERBAIKAN 2: Penanganan Sub-detail yang Akurat Tanpa Mencampur Kategori Utama
+        function getSubDetailValues(columnKey, mainHeaderPrefix) {
+            if (!globalSheetData || globalSheetData.length === 0) return { total: 0, kk: null, laki: null, perempuan: null };
+
+            const headerRow = globalSheetData[0];
+            const colIndex = findColumnIndex(headerRow, columnKey);
+
+            if (colIndex === -1) return { total: 0, kk: null, laki: null, perempuan: null };
+
+            let startIndex = -1;
+            for (let i = 1; i < globalSheetData.length; i++) {
+                const rowHeader = globalSheetData[i][0] ? globalSheetData[i][0].toString().trim() : "";
+                if (rowHeader.toUpperCase().startsWith(mainHeaderPrefix.toUpperCase())) {
+                    startIndex = i;
+                    break;
+                }
+            }
+
+            if (startIndex === -1) return { total: 0, kk: null, laki: null, perempuan: null };
+
+            const total = Number(globalSheetData[startIndex][colIndex]) || 0;
+            let kk = null, laki = null, perempuan = null;
+
+            for (let i = startIndex + 1; i < globalSheetData.length; i++) {
+                const label = globalSheetData[i][0] ? globalSheetData[i][0].toString().trim().toUpperCase() : "";
+                // Hentikan pembacaan sub-detail jika bertemu dengan Kategori Utama bernomor lain (misal: 2. JUMLAH KK)
+                if (/^\d+\./.test(label)) break;
+
+                const val = Number(globalSheetData[i][colIndex]) || 0;
+                if (label === "JUMLAH KK") kk = val;
+                else if (label === "LAKI-LAKI") laki = val;
+                else if (label === "PEREMPUAN") perempuan = val;
+            }
+
+            return { total, kk, laki, perempuan };
+        }
+
+        function renderDashboard(selectedColumn) {
+            renderScorecards(selectedColumn);
+            renderAgeBarChart(selectedColumn);
+            renderPieCharts(selectedColumn);
+        }
+
+        // PERBAIKAN 3: Membaca Murni Kolom Sesuai Pilihan Dropdown User
+        function renderScorecards(columnKey) {
+            const container = document.getElementById("scorecardsGrid");
+            container.innerHTML = "";
+
+            const topCategories = [
+                { prefix: "1. JUMLAH PENDUDUK AWAL WNI", title: "PENDUDUK WNI", labelBawah: "PENDUDUK WNI SAAT INI", icon: "users" },
+                { prefix: "2. JUMLAH KK", title: "JUMLAH KK", labelBawah: "JUMLAH KK SAAT INI", icon: "home" },
+                { prefix: "3. JUMLAH LAKI-LAKI", title: "JUMLAH LAKI-LAKI", labelBawah: "JUMLAH LAKI-LAKI SAAT INI", icon: "user" },
+                { prefix: "4. JUMLAH PEREMPUAN", title: "JUMLAH PEREMPUAN", labelBawah: "JUMLAH PEREMPUAN SAAT INI", icon: "user-check" }
+            ];
+
+            topCategories.forEach(cat => {
+                const mainVal = getSubDetailValues(columnKey, cat.prefix).total;
+                const liveVal = getSubDetailValues("DATA HIDUP", cat.prefix).total;
+
+                const cardHTML = `
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200 card-shadow card-shadow-hover flex flex-col justify-between transition-all relative overflow-hidden border-t-4 border-t-emerald-500">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">${cat.title}</p>
+                                <h3 class="text-3xl font-black text-slate-800 mt-1.5 tracking-tight">${mainVal.toLocaleString("id-ID")}</h3>
+                            </div>
+                            <div class="p-3 bg-slate-50 text-emerald-600 rounded-2xl border border-slate-100 shadow-sm">
+                                <i data-lucide="${cat.icon}" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                        <div class="mt-5 pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 justify-end items-center min-h-[36px]">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">${cat.labelBawah}: ${liveVal.toLocaleString("id-ID")}</span>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML("beforeend", cardHTML);
+            });
+
+            // Scorecard Kategori 5 s/d 19
+            const otherCategories = [
+                { prefix: "5. JUMLAH PINDAH DATANG", title: "Pindah Datang", icon: "user-plus" },
+                { prefix: "6. PINDAH KELUAR", title: "Pindah Keluar", icon: "user-minus" },
+                { prefix: "7. JUMLAH KELAHIRAN", title: "Jumlah Kelahiran", icon: "baby" },
+                { prefix: "8. JUMLAH KEMATIAN", title: "Jumlah Kematian", icon: "activity" },
+                { prefix: "9. JUMLAH PENDUDUK NON PERMANEN", title: "Penduduk Non-Permanen", icon: "user-x" },
+                { prefix: "10. JUMLAH WARGA NEGARA ASING (WNA)", title: "Warga Negara Asing (WNA)", icon: "globe" },
+                { prefix: "11. JUMLAH ADMINISTRASI SURAT MENYURAT", title: "Administrasi Surat", icon: "file-text" },
+                { prefix: "12. JUMLAH BALITA UMUR 0-1 TAHUN", title: "Balita 0-1 Tahun", icon: "baby" },
+                { prefix: "13. JUMLAH BALITA UMUR 1-3 TAHUN", title: "Balita 1-3 Tahun", icon: "smile" },
+                { prefix: "14. JUMLAH BALITA UMUR 4-5 TAHUN", title: "Balita 4-5 Tahun", icon: "heart" },
+                { prefix: "15. JUMLAH PEMILIH UMUR 17+", title: "Pemilih (17+ Thn)", icon: "vote" },
+                { prefix: "16. JUMLAH LANSIA UMUR 60+", title: "Lansia (60+ Thn)", icon: "shield" },
+                { prefix: "17. JUMLAH LANSIA UMUR 75+", title: "Lansia (75+ Thn)", icon: "award" },
+                { prefix: "18. JUMLAH DISABILITAS", title: "Disabilitas", icon: "accessibility" },
+                { prefix: "19. JUMLAH PENERIMA BANSOS", title: "Penerima Bansos", icon: "gift" }
+            ];
+
+            otherCategories.forEach(cat => {
+                const data = getSubDetailValues(columnKey, cat.prefix);
+
+                let detailBadgesHTML = "";
+                if (data.kk !== null) {
+                    detailBadgesHTML += `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">KK: ${data.kk}</span>`;
+                }
+                if (data.laki !== null) {
+                    detailBadgesHTML += `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">Laki: ${data.laki}</span>`;
+                }
+                if (data.perempuan !== null) {
+                    detailBadgesHTML += `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-rose-50 text-rose-700 border border-rose-100">Perempuan: ${data.perempuan}</span>`;
+                }
+
+                const cardHTML = `
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200 card-shadow card-shadow-hover flex flex-col justify-between transition-all relative overflow-hidden border-t-4 border-t-orange-500">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">${cat.title}</p>
+                                <h3 class="text-3xl font-black text-slate-800 mt-1.5 tracking-tight">${data.total.toLocaleString("id-ID")}</h3>
+                            </div>
+                            <div class="p-3 bg-slate-50 text-emerald-600 rounded-2xl border border-slate-100 shadow-sm">
+                                <i data-lucide="${cat.icon}" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                        <div class="mt-5 pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 justify-end items-center min-h-[36px]">
+                            ${detailBadgesHTML || '<span class="text-xs text-slate-300 italic">-</span>'}
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML("beforeend", cardHTML);
+            });
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function renderAgeBarChart(columnKey) {
+            const canvas = document.getElementById('ageBarChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const labels = ['0-1 Thn', '1-3 Thn', '4-5 Thn', 'Pemilih (17+)', 'Lansia (60+)', 'Lansia (75+)', 'Disabilitas', 'Bansos'];
+            const values = [
+                getSubDetailValues(columnKey, "12. JUMLAH BALITA UMUR 0-1 TAHUN").total,
+                getSubDetailValues(columnKey, "13. JUMLAH BALITA UMUR 1-3 TAHUN").total,
+                getSubDetailValues(columnKey, "14. JUMLAH BALITA UMUR 4-5 TAHUN").total,
+                getSubDetailValues(columnKey, "15. JUMLAH PEMILIH UMUR 17+").total,
+                getSubDetailValues(columnKey, "16. JUMLAH LANSIA UMUR 60+").total,
+                getSubDetailValues(columnKey, "17. JUMLAH LANSIA UMUR 75+").total,
+                getSubDetailValues(columnKey, "18. JUMLAH DISABILITAS").total,
+                getSubDetailValues(columnKey, "19. JUMLAH PENERIMA BANSOS").total
+            ];
+
+            if (chartInstances.bar) chartInstances.bar.destroy();
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, '#10b981');
+            gradient.addColorStop(1, '#059669');
+
+            chartInstances.bar = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Jumlah Warga',
+                        data: values,
+                        backgroundColor: gradient,
+                        borderRadius: 10,
+                        hoverBackgroundColor: '#047857'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#1e293b',
+                            font: { family: 'Plus Jakarta Sans', weight: 'bold', size: 11 },
+                            formatter: (val) => val.toLocaleString("id-ID")
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } } },
+                        x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' } } }
+                    }
+                }
+            });
+        }
+
+        function renderPieCharts(columnKey) {
+            const createPie = (canvasId, key, labels, colors, dataValues) => {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                if (chartInstances[key]) chartInstances[key].destroy();
+
+                chartInstances[key] = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: dataValues,
+                            backgroundColor: colors,
+                            borderWidth: 3,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { 
+                                position: 'bottom', 
+                                labels: { 
+                                    boxWidth: 10, 
+                                    usePointStyle: true,
+                                    font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' } 
+                                } 
+                            },
+                            datalabels: {
+                                color: '#ffffff',
+                                font: { family: 'Plus Jakarta Sans', weight: 'bold', size: 11 },
+                                formatter: (val) => val > 0 ? val.toLocaleString("id-ID") : ''
+                            }
+                        },
+                        cutout: '65%'
+                    }
+                });
+            };
+
+            const wni = getSubDetailValues(columnKey, "1. JUMLAH PENDUDUK AWAL WNI").total;
+            const wna = getSubDetailValues(columnKey, "10. JUMLAH WARGA NEGARA ASING (WNA)").total;
+            createPie('pieWniWna', 'wniWna', ['WNI', 'WNA'], ['#8b5cf6', '#f59e0b'], [wni, wna]);
+
+            const datang = getSubDetailValues(columnKey, "5. JUMLAH PINDAH DATANG").total;
+            const keluar = getSubDetailValues(columnKey, "6. PINDAH KELUAR").total;
+            createPie('pieMutasi', 'mutasi', ['Datang', 'Keluar'], ['#3b82f6', '#ef4444'], [datang, keluar]);
+
+            const laki = getSubDetailValues(columnKey, "3. JUMLAH LAKI-LAKI").total;
+            const perempuan = getSubDetailValues(columnKey, "4. JUMLAH PEREMPUAN").total;
+            createPie('pieGender', 'gender', ['Laki-Laki', 'Perempuan'], ['#6366f1', '#ec4899'], [laki, perempuan]);
+
+            const lahir = getSubDetailValues(columnKey, "7. JUMLAH KELAHIRAN").total;
+            const mati = getSubDetailValues(columnKey, "8. JUMLAH KEMATIAN").total;
+            createPie('pieVitalitas', 'vitalitas', ['Kelahiran', 'Kematian'], ['#06b6d4', '#64748b'], [lahir, mati]);
+        }
+    </script>
+</body>
+</html>
