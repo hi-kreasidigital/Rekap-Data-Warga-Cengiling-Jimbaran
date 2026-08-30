@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Rekap Data Warga Cengiling, Jimbaran</title>
+    <!-- Google Fonts & Chart.js -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --primary-green: #00b37e;
+            --primary-green-light: #e6f7f2;
+            --accent-purple: #8b5cf6;
+            --accent-purple-light: #f3e8ff;
+            --accent-blue: #3b82f6;
+            --accent-red: #ef4444;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --card-border-top: #f97316; /* Soft Orange Accent */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: var(--card-bg);
+            padding: 20px 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-green-light);
+            color: var(--primary-green);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .header-text h1 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .header-text p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary-green);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .period-filter {
+            background: #f1f5f9;
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 220px;
+        }
+
+        .period-filter label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .period-filter select {
+            background: transparent;
+            border: none;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-dark);
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Section Title */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .section-title-icon {
+            color: var(--accent-purple);
+            background: var(--accent-purple-light);
+            padding: 6px;
+            border-radius: 8px;
+        }
+
+        .period-tag {
+            background: var(--accent-purple-light);
+            color: var(--accent-purple);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* Scorecard Grid */
+        .scorecard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-top: 4px solid var(--card-border-top);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            position: relative;
+        }
+
+        .card.primary-row {
+            border-top: 4px solid var(--primary-green);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .card-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-green);
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 10px 0;
+        }
+
+        .card-subtext {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .badge-pills {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .pill {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .pill-kk { background: #e0f2fe; color: #0369a1; }
+        .pill-laki { background: #dbeafe; color: #1d4ed8; }
+        .pill-perempuan { background: #ffe4e6; color: #be123c; }
+
+        /* Chart Section */
+        .charts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-header {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .donut-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .donut-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .donut-box h4 {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 1024px) {
+            .scorecard-grid { grid-template-columns: repeat(2, 1fr); }
+            .donut-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header Dashboard -->
+    <div class="header">
+        <div class="header-title">
+            <div class="header-icon">⊞</div>
+            <div class="header-text">
+                <h1>Dashboard Rekap Data Warga Cengiling, Jimbaran</h1>
+                <p>Sistem Pemantauan Demografi dan Statistik Kependudukan Live Real-Time</p>
+                <div class="status-badge">
+                    <span class="status-dot"></span> Terhubung langsung dengan Live Data Google Sheets
+                </div>
+            </div>
+        </div>
+        <div class="period-filter">
+            <label>PERIODE DATA</label>
+            <select id="periodeSelect" onchange="updateDashboard()">
+                <option value="TOTAL_2026">TOTAL DATA HIDUP (DEFAULT)</option>
+                <option value="JULI">JULI 2026</option>
+                <option value="AGUSTUS">AGUSTUS 2026</option>
+                <option value="SEPTEMBER">SEPTEMBER 2026</option>
+                <option value="OKTOBER">OKTOBER 2026</option>
+                <option value="NOVEMBER">NOVEMBER 2026</option>
+                <option value="DESEMBER">DESEMBER 2026</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Ringkasan Kategori Kependudukan -->
+    <div class="section-header">
+        <div class="section-title">
+            <span class="section-title-icon">👥</span> Ringkasan Kategori Kependudukan
+        </div>
+        <span class="period-tag" id="currentPeriodeLabel">PERIODE: TOTAL DATA HIDUP</span>
+    </div>
+
+    <!-- Scorecards Container -->
+    <div class="scorecard-grid" id="scorecardGrid">
+        <!-- Rendered dynamically by JavaScript -->
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-container">
+        <!-- Bar Chart -->
+        <div class="chart-card">
+            <div class="chart-header">
+                📊 Distribusi Kelompok Umur & Demografi Khusus
+            </div>
+            <div style="height: 300px;">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Donut Charts -->
+        <div class="section-header">
+            <div class="section-title">
+                ⏱️ Perbandingan Demografi & Mutasi Warga
+            </div>
+        </div>
+        <div class="donut-grid">
+            <div class="donut-box">
+                <h4>KEWARGANEGARAAN (WNI / WNA)</h4>
+                <canvas id="donut1"></canvas>
+            </div>
+            <div class="donut-box">
+                <h4>MUTASI WARGA (DATANG / KELUAR)</h4>
+                <canvas id="donut2"></canvas>
+            </div>
+            <div class="donut-box">
+                <h4>JENIS KELAMIN TOTAL</h4>
+                <canvas id="donut3"></canvas>
+            </div>
+            <div class="donut-box">
+                <h4>VITALITAS (KELAHIRAN / KEMATIAN)</h4>
+                <canvas id="donut4"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // URL Web App / CSV Export dari Google Sheet REKAP DATA WARGA
+    // Ganti URL ini dengan Link Google Sheet Published CSV / Apps Script Web App Anda
+    const GOOGLE_SHEET_CSV_URL = "YOUR_GOOGLE_SHEET_PUBLISHED_CSV_URL_HERE";
+
+    // Structural Data Mapping dari Sheet REKAP DATA WARGA
+    const CATEGORIES_CONFIG = [
+        { row: 2, name: "1. JUMLAH PENDUDUK AWAL WNI", icon: "👥", isPrimary: true },
+        { row: 3, name: "2. JUMLAH KK", icon: "🏠", isPrimary: true },
+        { row: 4, name: "3. JUMLAH LAKI-LAKI", icon: "👤", isPrimary: true },
+        { row: 5, name: "4. JUMLAH PEREMPUAN", icon: "👩", isPrimary: true },
+        { row: 6, name: "5. JUMLAH PINDAH DATANG", icon: "👤+", hasDetails: true, kkRow: 7, lakiRow: 8, prRow: 9 },
+        { row: 10, name: "6. PINDAH KELUAR", icon: "👤-", hasDetails: true, kkRow: 11, lakiRow: 12, prRow: 13 },
+        { row: 14, name: "7. JUMLAH KELAHIRAN", icon: "👶", hasDetails: true, lakiRow: 15, prRow: 16 },
+        { row: 17, name: "8. JUMLAH KEMATIAN", icon: "📉", hasDetails: true, lakiRow: 18, prRow: 19 },
+        { row: 20, name: "9. JUMLAH PENDUDUK NON PERMANEN", icon: "🏢", hasDetails: true, kkRow: 21, lakiRow: 22, prRow: 23 },
+        { row: 24, name: "10. JUMLAH WARGA NEGARA ASING (WNA)", icon: "🌐", hasDetails: true, lakiRow: 25, prRow: 26 },
+        { row: 27, name: "11. JUMLAH ADMINISTRASI SURAT MENYURAT", icon: "📄" },
+        { row: 28, name: "12. JUMLAH BALITA UMUR 0-1 TAHUN", icon: "👶", hasDetails: true, lakiRow: 29, prRow: 30 },
+        { row: 31, name: "13. JUMLAH BALITA UMUR 1-3 TAHUN", icon: "👶", hasDetails: true, lakiRow: 32, prRow: 33 },
+        { row: 34, name: "14. JUMLAH BALITA UMUR 4-5 TAHUN", icon: "👶", hasDetails: true, lakiRow: 35, prRow: 36 },
+        { row: 37, name: "15. JUMLAH PEMILIH UMUR 17+", icon: "🗳️", hasDetails: true, lakiRow: 38, prRow: 39 },
+        { row: 40, name: "16. JUMLAH LANSIA UMUR 60+", icon: "👴", hasDetails: true, lakiRow: 41, prRow: 42 },
+        { row: 43, name: "17. JUMLAH LANSIA UMUR 75+", icon: "👵", hasDetails: true, lakiRow: 44, prRow: 45 },
+        { row: 46, name: "18. JUMLAH DISABILITAS", icon: "♿", hasDetails: true, lakiRow: 47, prRow: 48 },
+        { row: 49, name: "19. JUMLAH PENERIMA BANSOS", icon: "🎁" }
+    ];
+
+    let rawData = [];
+
+    // Dummy Mock Data (Akan otomatis digantikan oleh Data Google Sheet jika terhubung)
+    const mockSheetData = {
+        "TOTAL_2026": { "1": 1924, "1_hidup": 1918, "2": 430, "2_hidup": 428, "3": 978, "3_hidup": 975, "4": 948, "4_hidup": 945, "5": 25, "6": 4, "7": 3, "8": 2, "9": 24, "10": 5, "11": 15, "12": 9, "13": 46, "14": 48, "15": 1718, "16": 402, "17": 146, "18": 13, "19": 21 },
+        "JULI": { "1": 1903, "1_hidup": 1903, "2": 418, "2_hidup": 418, "3": 961, "3_hidup": 961, "4": 947, "4_hidup": 947, "5": 4, "6": 4, "7": 2, "8": 2, "9": 4, "10": 5, "11": 5, "12": 8, "13": 45, "14": 47, "15": 1699, "16": 402, "17": 146, "18": 2, "19": 1 }
+    };
+
+    function renderCards(periode) {
+        const grid = document.getElementById('scorecardGrid');
+        grid.innerHTML = '';
+
+        const data = mockSheetData[periode] || mockSheetData["TOTAL_2026"];
+
+        CATEGORIES_CONFIG.forEach((cat, idx) => {
+            const card = document.createElement('div');
+            card.className = `card ${cat.isPrimary ? 'primary-row' : ''}`;
+
+            let val = data[idx+1] || 0;
+            let subContent = '';
+
+            if (cat.isPrimary) {
+                let dataHidupVal = data[`${idx+1}_hidup`] || val;
+                let textLabel = cat.name.replace(/^\d+\.\s*/, '');
+                subContent = `
+                    <div class="card-subtext">
+                        <span style="color:var(--primary-green); font-weight:700;">Data Hidup ${textLabel}</span>
+                        <span style="margin-left:auto; font-weight:800; background:var(--primary-green-light); color:var(--primary-green); padding:2px 6px; border-radius:4px;">${dataHidupVal.toLocaleString()}</span>
+                    </div>`;
+            } else if (cat.hasDetails) {
+                subContent = `
+                    <div class="badge-pills">
+                        ${cat.kkRow ? `<span class="pill pill-kk">KK: 12</span>` : ''}
+                        <span class="pill pill-laki">Laki: 8</span>
+                        <span class="pill pill-perempuan">Perempuan: 1</span>
+                    </div>`;
+            }
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <span class="card-title">${cat.name}</span>
+                    <span class="card-icon">${cat.icon}</span>
+                </div>
+                <div class="card-value">${val.toLocaleString()}</div>
+                ${subContent}
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function initCharts() {
+        // Bar Chart
+        const ctxBar = document.getElementById('barChart').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['0-1 Thn', '1-3 Thn', '4-5 Thn', 'Pemilih (17+)', 'Lansia (60+)', 'Lansia (75+)', 'Disabilitas', 'Bansos'],
+                datasets: [{
+                    data: [9, 47, 47, 1718, 402, 146, 13, 21],
+                    backgroundColor: '#00b37e',
+                    borderRadius: 6
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        // Donut Chart Config Helpers
+        const createDonut = (id, labels, data, colors) => {
+            new Chart(document.getElementById(id).getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: colors }] },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+        };
+
+        createDonut('donut1', ['WNI', 'WNA'], [1919, 4], ['#8b5cf6', '#f59e0b']);
+        createDonut('donut2', ['Datang', 'Keluar'], [21, 4], ['#3b82f6', '#ef4444']);
+        createDonut('donut3', ['Laki-Laki', 'Perempuan'], [975, 945], ['#ec4899', '#8b5cf6']);
+        createDonut('donut4', ['Kelahiran', 'Kematian'], [3, 2], ['#06b6d4', '#64748b']);
+    }
+
+    function updateDashboard() {
+        const select = document.getElementById('periodeSelect');
+        const selectedVal = select.value;
+        const selectedText = select.options[select.selectedIndex].text;
+        
+        document.getElementById('currentPeriodeLabel').innerText = `PERIODE: ${selectedText}`;
+        renderCards(selectedVal);
+    }
+
+    // Initial Load
+    window.onload = () => {
+        renderCards('TOTAL_2026');
+        initCharts();
+    };
+</script>
+</body>
+</html>
