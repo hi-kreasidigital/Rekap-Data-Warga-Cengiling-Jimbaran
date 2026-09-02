@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Rekap Data Warga — Cengiling, Jimbaran</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+  :root{
+    --teal-900:#0E3B3D;
+    --teal-800:#134B4D;
+    --teal-700:#1B5F61;
+    --sand-50:#F3EFE3;
+    --sand-100:#FBF9F3;
+    --gold-500:#C89A47;
+    --gold-100:#F1E3C2;
+    --coral-500:#D2694A;
+    --coral-100:#F3DBCF;
+    --ink-900:#1C2622;
+    --ink-600:#54615C;
+    --ink-400:#8B968F;
+    --line:#DCD4BF;
+    --radius-lg:18px;
+    --radius-sm:10px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--sand-50);color:var(--ink-900);font-family:'IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 28px 72px;}
+
+  /* ---------- Header ---------- */
+  header{
+    background:linear-gradient(165deg,var(--teal-900) 0%, var(--teal-700) 100%);
+    color:var(--sand-100);
+    padding:38px 28px 44px;
+    margin-bottom:-30px;
+  }
+  .header-inner{max-width:1240px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;}
+  .eyebrow{font-size:13px;letter-spacing:.02em;color:var(--gold-100);opacity:.85;margin:0 0 10px;font-weight:500;}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(28px,4vw,40px);line-height:1.08;margin:0 0 8px;letter-spacing:-.01em;}
+  .subtitle{font-size:15px;color:#CFE0DD;margin:0 0 16px;max-width:52ch;line-height:1.5;}
+  .live-row{display:flex;align-items:center;gap:8px;font-size:13.5px;color:#BFE3D4;}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:#5BD69A;box-shadow:0 0 0 3px rgba(91,214,154,.22);}
+  .live-dot.stale{background:var(--coral-500);box-shadow:0 0 0 3px rgba(210,105,74,.25);}
+
+  .controls{display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+  .period-label{font-size:12px;color:#BFE3D4;letter-spacing:.02em;}
+  select#periodSelect{
+    appearance:none;-webkit-appearance:none;
+    background:var(--sand-100) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%231C2622" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>') no-repeat right 14px center;
+    color:var(--ink-900);
+    border:none;border-radius:999px;
+    padding:11px 42px 11px 20px;
+    font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:14px;letter-spacing:.02em;
+    cursor:pointer;min-width:190px;text-align:left;
+  }
+  .refresh-btn{
+    background:transparent;border:1px solid rgba(255,255,255,.28);color:#DCEDE9;
+    border-radius:999px;padding:6px 14px;font-size:12.5px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;
+    display:flex;align-items:center;gap:6px;transition:background .15s ease;
+  }
+  .refresh-btn:hover{background:rgba(255,255,255,.1);}
+  .refresh-btn svg{width:13px;height:13px;}
+
+  /* ---------- Section shell ---------- */
+  section.panel{background:var(--sand-100);border-radius:var(--radius-lg);padding:26px 28px 30px;box-shadow:0 1px 2px rgba(28,38,34,.04), 0 12px 28px -18px rgba(28,38,34,.18);margin-bottom:22px;position:relative;}
+  .panel-title{font-family:'Fraunces',serif;font-size:19px;font-weight:600;margin:0 0 4px;color:var(--teal-900);}
+  .panel-sub{font-size:13px;color:var(--ink-400);margin:0 0 20px;}
+
+  /* ---------- Hero stats ---------- */
+  .hero-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  .hero-card{border:1px solid var(--line);border-radius:var(--radius-sm);padding:20px 18px;background:var(--sand-100);position:relative;overflow:hidden;}
+  .hero-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--teal-700);}
+  .hero-label{font-size:12.5px;color:var(--ink-600);margin:0 0 10px;font-weight:500;}
+  .hero-value{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:clamp(24px,2.6vw,32px);color:var(--ink-900);line-height:1;margin-bottom:12px;font-variant-numeric:tabular-nums;}
+  .hero-foot{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--ink-600);}
+  .hero-foot b{color:var(--teal-800);font-family:'IBM Plex Mono',monospace;font-weight:600;}
+
+  /* ---------- Stat grid (mutasi / khusus / kelompok) ---------- */
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .stat-grid.cols-3{grid-template-columns:repeat(3,1fr);}
+  .stat-card{border:1px solid var(--line);border-radius:var(--radius-sm);padding:16px 16px 15px;background:var(--sand-100);}
+  .stat-card.tone-positive{border-left:3px solid #5FA98C;}
+  .stat-card.tone-negative{border-left:3px solid var(--coral-500);}
+  .stat-label{font-size:12.5px;color:var(--ink-600);margin:0 0 8px;font-weight:500;}
+  .stat-value{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:24px;color:var(--ink-900);margin-bottom:10px;font-variant-numeric:tabular-nums;}
+  .badge-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .badge{font-size:11.5px;background:var(--sand-50);border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--ink-600);font-family:'IBM Plex Mono',monospace;}
+  .badge b{color:var(--ink-900);}
+
+  /* ---------- Charts ---------- */
+  .charts-row{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:stretch;}
+  .chart-box{border:1px solid var(--line);border-radius:var(--radius-sm);padding:18px 20px;background:var(--sand-100);}
+  .chart-box h3{font-family:'Fraunces',serif;font-size:15.5px;font-weight:600;margin:0 0 14px;color:var(--teal-900);}
+  .chart-canvas-wrap{position:relative;height:240px;width:100%;}
+  .donut-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  .donut-card{border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px 14px 10px;background:var(--sand-100);text-align:center;}
+  .donut-card h4{font-size:12.5px;font-weight:600;margin:0 0 6px;color:var(--ink-600);letter-spacing:.01em;}
+  .donut-canvas-wrap{position:relative;height:140px;width:100%;margin:0 auto;}
+  .donut-legend{display:flex;justify-content:center;gap:14px;font-size:11.5px;color:var(--ink-600);margin-top:4px;}
+  .donut-legend span{display:inline-flex;align-items:center;gap:5px;}
+  .swatch{width:8px;height:8px;border-radius:2px;display:inline-block;}
+
+  footer{text-align:center;font-size:12px;color:var(--ink-400);padding:18px 0 4px;}
+  footer a{color:var(--teal-700);}
+
+  @media (max-width:920px){
+    .hero-grid{grid-template-columns:repeat(2,1fr);}
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .stat-grid.cols-3{grid-template-columns:repeat(2,1fr);}
+    .charts-row{grid-template-columns:1fr;}
+    .donut-grid{grid-template-columns:repeat(2,1fr);}
+    .header-inner{align-items:flex-start;}
+    .controls{align-items:flex-start;}
+    .chart-canvas-wrap{height:200px;}
+    .donut-canvas-wrap{height:150px;max-width:220px;}
+  }
+  @media (max-width:560px){
+    .hero-grid{grid-template-columns:1fr;}
+    .stat-grid{grid-template-columns:1fr;}
+    .stat-grid.cols-3{grid-template-columns:1fr;}
+    .donut-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+    .wrap{padding:0 16px 56px;}
+    header{padding:30px 16px 40px;}
+    .chart-canvas-wrap{height:170px;}
+    .chart-box{padding:16px 14px;}
+    .donut-card{padding:10px 8px 8px;}
+    .donut-canvas-wrap{height:110px;max-width:150px;}
+    .donut-legend{font-size:10.5px;gap:8px;flex-wrap:wrap;}
+    .donut-card h4{font-size:11px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <p class="eyebrow">Banjar Cengiling · Jimbaran</p>
+      <h1>Rekap Data Warga</h1>
+      <p class="subtitle">Pemantauan demografi dan statistik kependudukan, tersambung langsung ke Google Sheets.</p>
+      <div class="live-row">
+        <span class="live-dot" id="liveDot"></span>
+        <span id="liveText">Menyambungkan ke data live…</span>
+      </div>
+    </div>
+    <div class="controls">
+      <span class="period-label">Periode data</span>
+      <select id="periodSelect"></select>
+      <button class="refresh-btn" id="refreshBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Segarkan
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="panel" id="heroPanel">
+    <p class="panel-title">Data Pokok</p>
+    <p class="panel-sub">Ringkasan penduduk dan kepala keluarga untuk periode terpilih.</p>
+    <div class="hero-grid" id="heroGrid"></div>
+  </section>
+
+  <section class="panel" id="mutasiPanel">
+    <p class="panel-title">Mutasi &amp; Vitalitas Warga</p>
+    <p class="panel-sub">Perpindahan penduduk, kelahiran, dan kematian pada periode terpilih.</p>
+    <div class="stat-grid" id="mutasiGrid"></div>
+  </section>
+
+  <section class="panel" id="khususPanel">
+    <p class="panel-title">Kependudukan Khusus</p>
+    <p class="panel-sub">Penduduk non-permanen, warga negara asing, dan administrasi surat-menyurat.</p>
+    <div class="stat-grid cols-3" id="khususGrid"></div>
+  </section>
+
+  <section class="panel" id="kelompokPanel">
+    <p class="panel-title">Kelompok Usia &amp; Kategori Khusus</p>
+    <p class="panel-sub">Balita, pemilih, lansia, disabilitas, dan penerima bantuan sosial.</p>
+    <div class="stat-grid" id="kelompokGrid"></div>
+  </section>
+
+  <section class="panel">
+    <div class="charts-row">
+      <div class="chart-box">
+        <h3>Distribusi kelompok umur &amp; demografi khusus</h3>
+        <div class="chart-canvas-wrap"><canvas id="barChart"></canvas></div>
+      </div>
+      <div class="donut-grid" id="donutGrid"></div>
+    </div>
+  </section>
+
+  <footer>
+    Data ditarik langsung dari sheet <em>REKAP DATA WARGA</em> · diperbarui otomatis setiap 2 menit<br>
+    Created by <a href="https://hi-kreasidigital.github.io/home/" target="_blank" rel="noopener">Kreasi Digital</a>
+  </footer>
+</div>
+
+<script>
+/* ============ CONFIG ============ */
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWrdSPkyqpT6mPzsqB8WTm2G2i0NUnEb_jBliEwg9aaNv2iX9YNOrUF68lCCEN5nk2foI5TSLLOpBa/pub?gid=1465075215&single=true&output=csv";
+
+// Fallback snapshot (used only if the live sheet can't be reached)
+const FALLBACK_CSV = `KATEGORI REKAP DATA WARGA,JULI,AGUSTUS,SEPTEMBER,OKTOBER,NOVEMBER,DESEMBER,TOTAL 2026
+JUMLAH PENDUDUK WNI ,1903,5,5,5,3,3,1924
+DATA HIDUP WNI,1897,5,5,5,3,3,1918
+JUMLAH KK,418,3,3,3,2,1,430
+DATA HIDUP KK,416,3,3,3,2,1,428
+JUMLAH LAKI-LAKI,961,4,5,5,3,0,978
+DATA HIDUP LAKI-LAKI,958,4,5,5,3,0,975
+JUMLAH PEREMPUAN,947,1,0,0,0,0,948
+DATA HIDUP PEREMPUAN,944,1,0,0,0,0,945
+JUMLAH PINDAH DATANG,4,5,5,5,3,3,25
+ JUMLAH KK,2,3,3,2,2,1,13
+ LAKI-LAKI,3,4,5,5,3,3,23
+ PEREMPUAN,1,1,0,0,0,0,2
+PINDAH KELUAR ,4,0,0,0,0,0,4
+JUMLAH KK ,2,0,0,0,0,0,2
+LAKI-LAKI,2,0,0,0,0,0,2
+PEREMPUAN ,2,0,0,0,0,0,2
+JUMLAH KELAHIRAN ,2,1,0,0,0,0,3
+LAKI-LAKI,2,1,0,0,0,0,3
+PEREMPUAN ,0,0,0,0,0,0,0
+JUMLAH KEMATIAN ,2,0,0,0,0,0,2
+LAKI-LAKI,1,0,0,0,0,0,1
+PEREMPUAN ,1,0,0,0,0,0,1
+JUMLAH PENDUDUK NON PERMANEN ,4,4,5,5,3,3,24
+JUMLAH KK ,1,2,3,2,2,1,11
+LAKI-LAKI,1,3,5,5,3,3,20
+PEREMPUAN ,3,1,0,0,0,0,4
+JUMLAH WARGA NEGARA ASING (WNA),5,0,0,0,0,0,5
+LAKI-LAKI,5,0,0,0,0,0,5
+PEREMPUAN ,0,0,0,0,0,0,0
+JUMLAH ADMINISTRASI SURAT MENYURAT ,5,5,1,1,1,2,15
+JUMLAH BALITA UMUR 0-1 TAHUN,8,1,0,0,0,0,9
+LAKI-LAKI,7,1,0,0,0,0,8
+PEREMPUAN ,1,0,0,0,0,0,1
+JUMLAH BALITA UMUR 1-3 TAHUN,45,1,0,0,0,0,46
+LAKI-LAKI,31,1,0,0,0,0,32
+PEREMPUAN ,14,0,0,0,0,0,14
+JUMLAH BALITA UMUR 4-5 TAHUN,47,1,0,0,0,0,48
+LAKI-LAKI,18,1,0,0,0,0,19
+PEREMPUAN ,29,0,0,0,0,0,29
+JUMLAH PEMILIH UMUR 17+,1699,3,5,5,3,3,1718
+LAKI-LAKI,837,3,5,5,3,3,856
+PEREMPUAN ,862,0,0,0,0,0,862
+JUMLAH LANSIA UMUR 60+,402,0,0,0,0,0,402
+LAKI-LAKI,201,0,0,0,0,0,201
+PEREMPUAN ,201,0,0,0,0,0,201
+JUMLAH LANSIA UMUR 75+,146,0,0,0,0,0,146
+LAKI-LAKI,75,0,0,0,0,0,75
+PEREMPUAN ,71,0,0,0,0,0,71
+JUMLAH DISABILITAS,2,3,3,2,2,1,13
+LAKI-LAKI,1,2,3,2,2,1,11
+PEREMPUAN ,1,1,0,0,0,0,2
+JUMLAH PENERIMA BANSOS,1,4,5,5,3,3,21`;
+
+const PERIODS = [
+  {label:'Total 2026', col:7},
+  {label:'Juli', col:1},
+  {label:'Agustus', col:2},
+  {label:'September', col:3},
+  {label:'Oktober', col:4},
+  {label:'November', col:5},
+  {label:'Desember', col:6},
+];
+
+// row index -> position within data rows (0-based, row 0 = "JUMLAH PENDUDUK WNI")
+const HERO = [
+  {label:'Penduduk WNI', main:0, subLabel:'Data hidup', sub:1},
+  {label:'Kepala Keluarga', main:2, subLabel:'Data hidup', sub:3},
+  {label:'Laki-laki', main:4, subLabel:'Data hidup', sub:5},
+  {label:'Perempuan', main:6, subLabel:'Data hidup', sub:7},
+];
+const MUTASI = [
+  {label:'Pindah Datang', main:8, tone:'positive', b:[{l:'KK',i:9},{l:'L',i:10},{l:'P',i:11}]},
+  {label:'Pindah Keluar', main:12, tone:'negative', b:[{l:'KK',i:13},{l:'L',i:14},{l:'P',i:15}]},
+  {label:'Kelahiran', main:16, tone:'positive', b:[{l:'L',i:17},{l:'P',i:18}]},
+  {label:'Kematian', main:19, tone:'negative', b:[{l:'L',i:20},{l:'P',i:21}]},
+];
+const KHUSUS = [
+  {label:'Penduduk Non-Permanen', main:22, b:[{l:'KK',i:23},{l:'L',i:24},{l:'P',i:25}]},
+  {label:'Warga Negara Asing', main:26, b:[{l:'L',i:27},{l:'P',i:28}]},
+  {label:'Administrasi Surat-Menyurat', main:29, b:[]},
+];
+const KELOMPOK = [
+  {label:'Balita 0–1 Tahun', main:30, b:[{l:'L',i:31},{l:'P',i:32}]},
+  {label:'Balita 1–3 Tahun', main:33, b:[{l:'L',i:34},{l:'P',i:35}]},
+  {label:'Balita 4–5 Tahun', main:36, b:[{l:'L',i:37},{l:'P',i:38}]},
+  {label:'Pemilih 17+ Tahun', main:39, b:[{l:'L',i:40},{l:'P',i:41}]},
+  {label:'Lansia 60+ Tahun', main:42, b:[{l:'L',i:43},{l:'P',i:44}]},
+  {label:'Lansia 75+ Tahun', main:45, b:[{l:'L',i:46},{l:'P',i:47}]},
+  {label:'Disabilitas', main:48, b:[{l:'L',i:49},{l:'P',i:50}]},
+  {label:'Penerima Bansos', main:51, b:[]},
+];
+const BAR_CATS = [
+  {label:'0-1 Thn', i:30},{label:'1-3 Thn', i:33},{label:'4-5 Thn', i:36},
+  {label:'Pemilih (17+)', i:39},{label:'Lansia (60+)', i:42},{label:'Lansia (75+)', i:45},
+  {label:'Disabilitas', i:48},{label:'Bansos', i:51},
+];
+const DONUTS = [
+  {title:'Kewarganegaraan (WNI / WNA)', labels:['WNI','WNA'], idx:[0,26], colors:['#1B5F61','#C89A47']},
+  {title:'Mutasi Warga (Datang / Keluar)', labels:['Datang','Keluar'], idx:[8,12], colors:['#5FA98C','#D2694A']},
+  {title:'Jenis Kelamin Total', labels:['Laki-laki','Perempuan'], idx:[4,6], colors:['#134B4D','#C89A47']},
+  {title:'Vitalitas (Lahir / Wafat)', labels:['Kelahiran','Kematian'], idx:[16,19], colors:['#5FA98C','#8B968F']},
+];
+
+/* ============ STATE ============ */
+Chart.register(ChartDataLabels);
+let rows = null;         // parsed data rows (excludes header)
+let currentCol = 7;       // default: Total 2026
+let barChart = null;
+let donutCharts = [];
+
+/* ============ HELPERS ============ */
+function parseCSV(text){
+  const lines = text.trim().split(/\r?\n/);
+  return lines.slice(1).map(line => line.split(',').map(c => c.trim()));
+}
+function val(rowIdx, col){
+  if(!rows || !rows[rowIdx]) return 0;
+  const n = parseFloat(rows[rowIdx][col]);
+  return isNaN(n) ? 0 : n;
+}
+function fmt(n){ return n.toLocaleString('id-ID'); }
+
+function buildPeriodSelect(){
+  const sel = document.getElementById('periodSelect');
+  sel.innerHTML = PERIODS.map(p => `<option value="${p.col}">${p.label}</option>`).join('');
+  sel.value = currentCol;
+  sel.addEventListener('change', e => { currentCol = parseInt(e.target.value); renderAll(); });
+}
+
+function heroCardHTML(cfg, col){
+  return `<div class="hero-card">
+    <p class="hero-label">${cfg.label}</p>
+    <div class="hero-value">${fmt(val(cfg.main,col))}</div>
+    <div class="hero-foot"><span>${cfg.subLabel}</span><b>${fmt(val(cfg.sub,col))}</b></div>
+  </div>`;
+}
+function statCardHTML(cfg, col){
+  const badges = cfg.b.map(x => `<span class="badge">${x.l}: <b>${fmt(val(x.i,col))}</b></span>`).join('');
+  const toneClass = cfg.tone ? ` tone-${cfg.tone}` : '';
+  return `<div class="stat-card${toneClass}">
+    <p class="stat-label">${cfg.label}</p>
+    <div class="stat-value">${fmt(val(cfg.main,col))}</div>
+    ${badges ? `<div class="badge-row">${badges}</div>` : ''}
+  </div>`;
+}
+
+function renderCards(col){
+  document.getElementById('heroGrid').innerHTML = HERO.map(c => heroCardHTML(c,col)).join('');
+  document.getElementById('mutasiGrid').innerHTML = MUTASI.map(c => statCardHTML(c,col)).join('');
+  document.getElementById('khususGrid').innerHTML = KHUSUS.map(c => statCardHTML(c,col)).join('');
+  document.getElementById('kelompokGrid').innerHTML = KELOMPOK.map(c => statCardHTML(c,col)).join('');
+}
+
+function renderBarChart(col){
+  const ctx = document.getElementById('barChart').getContext('2d');
+  const data = BAR_CATS.map(c => val(c.i,col));
+  const labels = BAR_CATS.map(c => c.label);
+  if(barChart){ barChart.data.labels = labels; barChart.data.datasets[0].data = data; barChart.update(); return; }
+  barChart = new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[{ data, backgroundColor:'#C89A47', borderRadius:5, maxBarThickness:46 }] },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      layout:{ padding:{ top:22 } },
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>fmt(c.parsed.y)}},
+        datalabels:{
+          anchor:'end', align:'top', clamp:true, offset:2,
+          color:'#54615C', font:{family:'IBM Plex Mono', size:10.5, weight:'600'},
+          formatter:v => fmt(v)
+        }
+      },
+      scales:{
+        y:{ beginAtZero:true, grid:{color:'#E7E0CE'}, ticks:{color:'#54615C', font:{family:'IBM Plex Mono',size:10.5}} },
+        x:{ grid:{display:false}, ticks:{color:'#54615C', font:{family:'IBM Plex Sans',size:10.5}, maxRotation:0, autoSkip:true} }
+      }
+    }
+  });
+}
+
+function renderDonuts(col){
+  const grid = document.getElementById('donutGrid');
+  if(donutCharts.length === 0){
+    grid.innerHTML = DONUTS.map((d,i) => `
+      <div class="donut-card">
+        <h4>${d.title}</h4>
+        <div class="donut-canvas-wrap"><canvas id="donut${i}"></canvas></div>
+        <div class="donut-legend">
+          <span><i class="swatch" style="background:${d.colors[0]}"></i>${d.labels[0]}</span>
+          <span><i class="swatch" style="background:${d.colors[1]}"></i>${d.labels[1]}</span>
+        </div>
+      </div>`).join('');
+    DONUTS.forEach((d,i) => {
+      const ctx = document.getElementById('donut'+i).getContext('2d');
+      donutCharts[i] = new Chart(ctx, {
+        type:'doughnut',
+        data:{ labels:d.labels, datasets:[{ data:d.idx.map(ix=>val(ix,col)), backgroundColor:d.colors, borderWidth:0 }] },
+        options:{
+          responsive:true, maintainAspectRatio:false, cutout:'62%',
+          plugins:{
+            legend:{display:false},
+            tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.parsed)}`}},
+            datalabels:{
+              color:'#fff', font:{family:'IBM Plex Mono', size:11.5, weight:'700'},
+              formatter:v => v > 0 ? fmt(v) : ''
+            }
+          }
+        }
+      });
+    });
+  } else {
+    DONUTS.forEach((d,i) => { donutCharts[i].data.datasets[0].data = d.idx.map(ix=>val(ix,col)); donutCharts[i].update(); });
+  }
+}
+
+function renderAll(){
+  renderCards(currentCol);
+  renderBarChart(currentCol);
+  renderDonuts(currentCol);
+}
+
+function setLive(ok, when){
+  const dot = document.getElementById('liveDot');
+  const txt = document.getElementById('liveText');
+  if(ok){
+    dot.classList.remove('stale');
+    txt.textContent = 'Tersambung ke Google Sheets · diperbarui ' + when.toLocaleTimeString('id-ID');
+  } else {
+    dot.classList.add('stale');
+    txt.textContent = 'Tidak dapat menjangkau sheet — menampilkan data cache terakhir';
+  }
+}
+
+async function loadData(){
+  try{
+    const res = await fetch(SHEET_CSV_URL, {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text = await res.text();
+    rows = parseCSV(text);
+    setLive(true, new Date());
+  }catch(err){
+    if(!rows){ rows = parseCSV(FALLBACK_CSV); }
+    setLive(false, new Date());
+  }
+  renderAll();
+}
+
+document.getElementById('refreshBtn').addEventListener('click', loadData);
+buildPeriodSelect();
+loadData();
+setInterval(loadData, 120000);
+</script>
+</body>
+</html>
